@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+{% block title %}Проверка сертификата{% endblock %}
+{% block content %}
+<div class="card" style="max-width:680px; margin: 0 auto;">
+  <h2>Проверка сертификата</h2>
+  {% if is_valid %}
+    <p style="color:#276e43;"><strong>Сертификат действителен.</strong></p>
+    <p><strong>Номер:</strong> {{ code }}</p>
+    <p><strong>Владелец:</strong> {{ username }}</p>
+    <p><strong>Дата выдачи:</strong> {{ issued_at|date:"d.m.Y H:i" }}</p>
+    <p><strong>Итоговые очки:</strong> {{ points }}</p>
+  {% else %}
+    <p style="color:#b91c1c;"><strong>Сертификат не найден или недействителен.</strong></p>
+    <p><strong>Проверяемый номер:</strong> {{ code }}</p>
+  {% endif %}
+</div>
+{% endblock %}

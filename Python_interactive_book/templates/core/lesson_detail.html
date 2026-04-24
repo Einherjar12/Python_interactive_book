@@ -1,0 +1,340 @@
+{% extends 'core/base.html' %}
+{% block title %}Урок: {{ lesson.title }}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/material-darker.css">
+<style>
+  .CodeMirror {
+    height: 500px;
+    border: 1px solid #1f2937;
+    border-radius: 14px;
+    font-size: 14px;
+  }
+  .card.section-card {
+    overflow-x: auto;
+    word-wrap: break-word;
+    white-space: normal;
+  }
+  .task-box pre, .task-box code {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="card page-card">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:12px; flex-wrap:wrap;">
+    <div>
+      <span class="cover-pill">Глава {{ lesson.order }} из {{ total_count }}</span>
+      <h2 style="margin:8px 0 0; color:var(--dino-green-900);">{{ lesson.title }}</h2>
+    </div>
+    <div style="min-width:220px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:6px;">
+        <span>Прогресс курса</span><span>{{ progress_percent }}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width: {{ progress_percent }}%;"></div></div>
+    </div>
+  </div>
+  <div class="grid lesson-grid" style="grid-template-columns: 1fr 1fr; align-items: start;">
+    <section class="card section-card" style="overflow-x: auto;">
+      <div class="section-title">Теория</div>
+      <img id="avatar" src="https://api.dicebear.com/8.x/bottts/svg?seed={{ request.user.username|urlencode }}&eyes[]=roundFrame02&mouth[]=square02&size=128" alt="Mentor" style="width:80px; height:80px; border-radius:50%; border:1px solid #e5dcc5; margin-bottom:15px;">
+      <div>{{ lesson.theory_html|safe }}</div>
+    </section>
+    <section class="card section-card" style="overflow-x: auto;">
+      <div class="section-title">Практика</div>
+      <div class="task-box">
+        <div style="font-weight:700; margin-bottom:6px;">Задание</div>
+        {% if lesson.tasks.all %}
+          <ol style="margin:0; padding-left:20px;">
+            {% for task in lesson.tasks.all %}
+              <li style="margin-bottom:6px; white-space: pre-line;">
+                {{ task.prompt }}
+                <span style="color:var(--muted); white-space: nowrap;">({{ task.points }}
+                  {% if task.points == 1 %}очко
+                  {% elif task.points >= 2 and task.points <= 4 %}очка
+                  {% else %}очков
+                  {% endif %})
+                </span>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <div style="color:var(--muted);">Для этого урока пока нет отдельного задания.</div>
+        {% endif %}
+      </div>
+      <textarea id="code" style="width:100%; height:160px;">{{ lesson.starter_code|default:"print('Hello!')" }}</textarea>
+      <div style="margin-top:8px;">
+        <button class="btn" id="runBtn">Запустить</button>
+        <button class="btn secondary" id="submitBtn" style="margin-left:8px;">Отправить</button>
+      </div>
+      <pre id="console" class="console-box"></pre>
+    </section>
+  </div>
+  <div class="chapter-nav">
+    <div>
+      {% if prev_lesson %}
+        <a class="btn ghost" href="/lesson/{{ prev_lesson.slug }}/">← Предыдущая глава</a>
+      {% endif %}
+    </div>
+    <div>
+      {% if next_lesson %}
+        <a class="btn" href="/lesson/{{ next_lesson.slug }}/">Следующая глава →</a>
+      {% else %}
+        <a class="btn" href="/profile/">Перейти в профиль</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<form style="display:none;">{% csrf_token %}</form>
+<script id="tests-data" type="application/json">{{ lesson.tests_inline|default:""|safe }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/python/python.js"></script>
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+let pyReady = null;
+let pyLoading = false;
+const textareaEl = document.getElementById('code');
+const codeEditor = CodeMirror.fromTextArea(textareaEl, {
+  mode: 'python',
+  theme: 'material-darker',
+  lineNumbers: true,
+  indentUnit: 4,
+  tabSize: 4,
+  lineWrapping: false,
+  autoCloseBrackets: true,
+  matchBrackets: true,
+});
+function getCodeValue() {
+  return codeEditor ? codeEditor.getValue() : (textareaEl?.value || '');
+}
+const consoleEl = document.getElementById('console');
+function writeConsole(text) {
+  if (!consoleEl) return;
+  consoleEl.textContent += text + "\n";
+}
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+}
+async function loadPyodideOnce() {
+  if (!pyReady && !pyLoading) {
+    pyLoading = true;
+    if (consoleEl) consoleEl.textContent = 'Загрузка интерпретатора Python... Это может занять до 10–15 секунд при первом запуске.\n';
+    pyReady = loadPyodide({indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.25.0/full/'}).finally(() => { pyLoading = false; });
+  }
+  return await pyReady;
+}
+const runBtn = document.getElementById('runBtn');
+const submitBtn = document.getElementById('submitBtn');
+runBtn.addEventListener('click', async () => {
+  consoleEl.textContent = '';
+  const code = getCodeValue();
+  runBtn.disabled = true; submitBtn.disabled = true;
+  let py;
+  try {
+    py = await loadPyodideOnce();
+  } catch (e) {
+    writeConsole('Не удалось загрузить Pyodide.');
+    runBtn.disabled = false; submitBtn.disabled = false;
+    return;
+  }
+  try {
+    py.globals.set('USER_CODE', code);
+    const result = await py.runPythonAsync(`
+import sys, io
+_buf = io.StringIO()
+_oldout, _olderr = sys.stdout, sys.stderr
+sys.stdout = sys.stderr = _buf
+try:
+    exec(USER_CODE, {})
+finally:
+    sys.stdout, sys.stderr = _oldout, _olderr
+_buf.getvalue()
+`);
+    writeConsole(result);
+    document.getElementById('avatar').src = `https://api.dicebear.com/8.x/bottts/svg?seed={{ request.user.username|urlencode }}&eyes[]=hearts&mouth[]=smile01&size=128&r=${Date.now()}`;
+  } catch (e) {
+    writeConsole(String(e));
+    document.getElementById('avatar').src = `https://api.dicebear.com/8.x/bottts/svg?seed={{ request.user.username|urlencode }}&eyes[]=dizzy&mouth[]=bite&size=128&r=${Date.now()}`;
+  } finally {
+    runBtn.disabled = false; submitBtn.disabled = false;
+  }
+});
+submitBtn.addEventListener('click', async () => {
+  const code = getCodeValue();
+  let testsSpec = null;
+  try {
+    const raw = document.getElementById('tests-data')?.textContent?.trim();
+    if (raw) {
+      testsSpec = JSON.parse(raw);
+    }
+  } catch (e) {}
+  let output = '';
+  let passed = false;
+  let report = { passed: false, checks: [], error: null };
+  submitBtn.disabled = true; runBtn.disabled = true;
+  let py;
+  try {
+    py = await loadPyodideOnce();
+    py.globals.set('USER_CODE', code);
+    py.globals.set('TESTS_JSON', testsSpec ? JSON.stringify(testsSpec) : 'null');
+    const resultJson = await py.runPythonAsync(`
+import sys, io, json
+report = {"passed": False, "checks": [], "stdout": "", "error": None}
+try:
+    _buf = io.StringIO()
+    _oldout, _olderr = sys.stdout, sys.stderr
+    sys.stdout = sys.stderr = _buf
+    g = {}
+    try:
+        exec(USER_CODE, g)
+    finally:
+        sys.stdout, sys.stderr = _oldout, _olderr
+    report["stdout"] = _buf.getvalue()
+    spec = None
+    if TESTS_JSON and TESTS_JSON != 'null':
+        spec = json.loads(TESTS_JSON)
+    all_ok = True
+    checks_count = 0
+    if spec and "expectedStdout" in spec and spec["expectedStdout"] is not None:
+        checks_count += 1
+        exp = spec["expectedStdout"]
+        got = report["stdout"].strip()
+        if isinstance(exp, list):
+            ok = all((str(item).strip() in got) for item in exp)
+            report["checks"].append({"type":"stdout_list","ok": ok, "expected": exp, "got": got})
+            all_ok = all_ok and ok
+        else:
+            ok = (str(exp).strip() == got)
+            report["checks"].append({"type":"stdout","ok": ok, "expected": str(exp).strip(), "got": got})
+            all_ok = all_ok and ok
+    if spec and "functionTests" in spec and spec["functionTests"]:
+        for ft in spec["functionTests"]:
+            fname = ft.get("function")
+            cases = ft.get("cases", [])
+            f = g.get(fname)
+            if not callable(f):
+                checks_count += 1
+                report["checks"].append({"type":"function_exists","ok": False, "function": fname})
+                all_ok = False
+                continue
+            for c in cases:
+                checks_count += 1
+                args = c.get("args", [])
+                kwargs = c.get("kwargs", {})
+                expected = c.get("expected")
+                try:
+                    res = f(*args, **kwargs)
+                    ok = res == expected
+                    report["checks"].append({"type":"function_case","function": fname, "ok": ok, "args": args, "kwargs": kwargs, "expected": expected, "got": res})
+                    all_ok = all_ok and ok
+                except Exception as ex:
+                    report["checks"].append({"type":"function_case","function": fname, "ok": False, "args": args, "kwargs": kwargs, "error": str(ex)})
+                    all_ok = False
+    if spec and spec.get("expressionTests"):
+        for et in spec["expressionTests"]:
+            expr = et.get("expr")
+            if not expr:
+                continue
+            checks_count += 1
+            expected = et.get("expected")
+            try:
+                res = eval(expr, {"__builtins__": __builtins__}, g)
+                ok = res == expected
+                report["checks"].append({"type":"expression","ok": ok, "expr": expr, "expected": expected, "got": res})
+                all_ok = all_ok and ok
+            except Exception as ex:
+                report["checks"].append({"type":"expression","ok": False, "expr": expr, "error": str(ex)})
+                all_ok = False
+    report["passed"] = bool(all_ok and checks_count > 0)
+except Exception as e:
+    report["error"] = str(e)
+json.dumps(report)
+`);
+    report = JSON.parse(resultJson);
+    output = report.stdout || '';
+    passed = !!report.passed && !report.error;
+    writeConsole('[Проверка] ' + (passed ? 'УСПЕХ' : 'НЕ ПРОЙДЕНО'));
+    if (report.error) {
+      writeConsole('Ошибка исполнения: ' + report.error);
+    }
+    for (const ch of (report.checks || [])) {
+      if (ch.type === 'stdout') {
+        writeConsole(`stdout: ok=${ch.ok} expected="${ch.expected}" got="${ch.got}"`);
+      } else if (ch.type === 'function_case') {
+        if ('error' in ch) {
+          writeConsole(`function ${ch.function}(${JSON.stringify(ch.args)}) error=${ch.error}`);
+        } else {
+          writeConsole(`function ${ch.function}(${JSON.stringify(ch.args)}) -> got=${JSON.stringify(ch.got)}, expected=${JSON.stringify(ch.expected)}, ok=${ch.ok}`);
+        }
+      } else if (ch.type === 'expression') {
+        if ('error' in ch) {
+          writeConsole(`expr ${ch.expr} error=${ch.error}`);
+        } else {
+          writeConsole(`expr ${ch.expr} -> got=${JSON.stringify(ch.got)}, expected=${JSON.stringify(ch.expected)}, ok=${ch.ok}`);
+        }
+      }
+    }
+    document.getElementById('avatar').src = passed
+      ? `https://api.dicebear.com/8.x/bottts/svg?seed={{ request.user.username|urlencode }}&eyes[]=hearts&mouth[]=smile01&size=128&r=${Date.now()}`
+      : `https://api.dicebear.com/8.x/bottts/svg?seed={{ request.user.username|urlencode }}&eyes[]=dizzy&mouth[]=bite&size=128&r=${Date.now()}`;
+  } catch (e) {
+    writeConsole('Ошибка выполнения проверки: ' + String(e));
+  }
+  const form = new FormData();
+  form.append('is_success', passed ? '1' : '0');
+  form.append('output', output || consoleEl.textContent || '');
+  form.append('code', code);
+  const res = await fetch('/submit/{{ lesson.slug }}/', { method: 'POST', headers: {'X-CSRFToken': getCookie('csrftoken')}, body: form });
+  if (res.ok) {
+    const data = await res.json();
+    writeConsole('Отправлено. Начислено: ' + data.awarded + ' очков. Прогресс: ' + data.completed_percent + ' %');
+    if (passed && data.success && window.confetti) {
+      window.confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+    }
+  } else {
+    writeConsole('Ошибка отправки');
+  }
+  submitBtn.disabled = false;
+  runBtn.disabled = false;
+});
+</script>
+
+<script>
+function equalizeColumns() {
+    const leftCol = document.querySelector('.lesson-grid .section-card:first-child');
+    const rightCol = document.querySelector('.lesson-grid .section-card:last-child');
+
+    if (leftCol && rightCol) {
+        // Сбрасываем min-height перед измерением
+        leftCol.style.minHeight = 'auto';
+        rightCol.style.minHeight = 'auto';
+
+        // Получаем реальную высоту каждой колонки
+        const leftHeight = leftCol.offsetHeight;
+        const rightHeight = rightCol.offsetHeight;
+
+        // Берём максимальную высоту
+        const maxHeight = Math.max(leftHeight, rightHeight);
+
+        // Устанавливаем одинаковую высоту
+        leftCol.style.minHeight = maxHeight + 'px';
+        rightCol.style.minHeight = maxHeight + 'px';
+    }
+}
+
+// Запускаем после загрузки страницы
+window.addEventListener('load', equalizeColumns);
+// Запускаем при изменении размера окна
+window.addEventListener('resize', equalizeColumns);
+// Запускаем после загрузки теории (если есть динамический контент)
+setTimeout(equalizeColumns, 100);
+</script>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends 'core/base.html' %}
+{% block title %}Оглавление{% endblock %}
+{% block content %}
+<div class="card">
+  <h2 style="margin-top:0;">Оглавление</h2>
+  <div class="grid" style="grid-template-columns:1fr 1fr;">
+    {% for it in items %}
+      <a href="/lesson/{{ it.lesson.slug }}/" class="card" style="display:block; text-decoration:none;">
+        <div style="font-size:13px; color:var(--muted);">Глава {{ it.lesson.order }}</div>
+        <div style="font-size:18px; font-weight:700; color:var(--dino-green-900);">{{ it.lesson.title }}</div>
+        {% if it.is_completed %}
+          <div style="margin-top:8px; color:#2a5f40;">✓ Пройдено · {{ it.best_score }}
+            {% if it.best_score == 1 %}очко
+            {% elif it.best_score >= 2 and it.best_score <= 4 %}очка
+            {% else %}очков
+            {% endif %}
+          </div>
+        {% else %}
+          <div style="margin-top:8px; color:var(--muted);">В процессе</div>
+        {% endif %}
+      </a>
+    {% empty %}
+      <div>Пока нет уроков. Добавьте их через админку.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

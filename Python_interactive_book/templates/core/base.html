@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Dino Python Book{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/core/css/theme.css">
+    {% block head %}{% endblock %}
+    <style>
+      body { font-family: Inter, ui-sans-serif, system-ui; margin: 0; }
+      .container { max-width: 1180px; margin: 0 auto; padding: 16px; }
+      .grid { display: grid; gap: 16px; }
+    </style>
+</head>
+<body class="app-shell">
+    <header class="container app-header">
+        <div class="app-header-inner">
+            <div><a href="/" class="brand">Dino Python Book</a></div>
+            <nav class="top-nav">
+                {% if user.is_authenticated %}
+                    <span class="nav-user">{{ user.username }}</span>
+                    <span class="top-nav-dot">·</span>
+                    <a href="/toc/">Оглавление</a> ·
+                    <a href="/profile/">Личный кабинет</a> ·
+                    <a href="/logout/">Выход</a>
+                {% else %}
+                    <a href="/login/">Войти</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    <main class="container page enter" id="page">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="container app-footer">
+        © 2026 Dino Python Book
+    </footer>
+    <script>
+      const page = document.getElementById('page');
+      window.addEventListener('DOMContentLoaded', () => {
+        page.classList.add('enter-active');
+        setTimeout(() => page.classList.remove('enter', 'enter-active'), 450);
+      });
+      document.addEventListener('click', (e) => {
+        const a = e.target.closest('a');
+        if (!a || a.target === '_blank' || a.hasAttribute('download') || a.href.indexOf('#') > -1) return;
+        if (a.origin !== location.origin) return;
+        e.preventDefault();
+        page.classList.add('leave');
+        setTimeout(() => page.classList.add('leave-active'), 10);
+        setTimeout(() => { window.location.href = a.href; }, 350);
+      });
+      document.addEventListener('mousemove', (e) => {
+        document.body.style.setProperty('--mx', e.clientX + 'px');
+        document.body.style.setProperty('--my', e.clientY + 'px');
+      });
+    </script>
+
+    <!-- Переключение видимости пароля -->
+    <script>
+    (function() {
+        function initPasswordToggles() {
+            document.querySelectorAll('.password-toggle').forEach(function(button) {
+                // Убираем старые обработчики, если они были
+                button.removeEventListener('click', button._toggleHandler);
+                // Создаём новый обработчик
+                button._toggleHandler = function() {
+                    var wrapper = this.closest('.password-wrapper');
+                    var input = wrapper.querySelector('input');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        this.textContent = '🙈';
+                    } else {
+                        input.type = 'password';
+                        this.textContent = '👁️';
+                    }
+                };
+                button.addEventListener('click', button._toggleHandler);
+            });
+        }
+
+        // Запускаем при загрузке страницы
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPasswordToggles);
+        } else {
+            initPasswordToggles();
+        }
+    })();
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

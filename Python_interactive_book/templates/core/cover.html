@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+{% block title %}Dino Python Book — обложка{% endblock %}
+{% block content %}
+<div class="book-cover">
+  <div style="display:grid; grid-template-columns:1fr 1fr;">
+    <div class="book-cover-page">
+      <span class="cover-pill">Interactive Book</span>
+      <h1 style="margin:10px 0 0; font-size:42px; line-height:1.1; color:var(--dino-green-900);">Dino Python Book</h1>
+      <p style="margin-top:12px; font-size:18px; color:var(--muted); max-width:460px;">
+        Изучайте Python и ООП в формате живой книги: теория, запуск кода в браузере, мотивация и сертификат.
+      </p>
+      <ul class="feature-list">
+        <li>7 практических уроков по ООП</li>
+        <li>Редактор с подсветкой</li>
+        <li>Очки, эмоции персонажа, конфетти</li>
+      </ul>
+      <div style="margin-top:18px;">
+        <a class="btn" href="/login/">Войти в книгу</a>
+        <a class="btn secondary" href="/register/" style="margin-left:8px;">Создать аккаунт</a>
+      </div>
+    </div>
+    <div class="book-cover-page">
+      <div class="card" style="height:100%; display:flex; flex-direction:column; justify-content:center;">
+        <div style="font-size:14px; color:var(--muted);">Edition 2026</div>
+        <h3 style="margin:6px 0 10px; color:var(--dino-green-900);">Python OOP Journey</h3>
+        <p style="margin:0 0 12px; color:var(--muted);">
+          Пройдите путь от классов и инкапсуляции до dunder-методов и композиции.
+        </p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="cover-pill">Pyodide</span>
+          <span class="cover-pill">Django</span>
+          <span class="cover-pill">PDF Certificate</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

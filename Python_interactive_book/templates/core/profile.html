@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+{% block title %}Личный кабинет{% endblock %}
+{% block content %}
+<div class="card page-card">
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+    <div>
+      <span class="cover-pill">Ваш кабинет</span>
+      <h2 style="margin:8px 0 0; color:var(--dino-green-900);">Прогресс обучения</h2>
+    </div>
+    <div style="min-width:220px;">
+      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:6px;">
+        <span>Общий прогресс</span><span>{{ profile_obj.completed_percent }}%</span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" style="width: {{ profile_obj.completed_percent }}%;"></div></div>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top:14px;">
+    <div class="card section-card">
+      <div class="section-title">Очки</div>
+      <div style="font-size:28px; font-weight:800; color:var(--dino-green-900);">{{ profile_obj.total_points }}</div>
+      <div style="font-size:14px; color:var(--muted);">
+        {% if profile_obj.total_points == 1 %}очко
+        {% elif profile_obj.total_points >= 2 and profile_obj.total_points <= 4 %}очка
+        {% else %}очков
+        {% endif %}
+      </div>
+    </div>
+    <div class="card section-card">
+      <div class="section-title">Завершено</div>
+      <div style="font-size:28px; font-weight:800; color:var(--dino-green-900);">{{ profile_obj.completed_percent }}%</div>
+    </div>
+    <div class="card section-card">
+      <div class="section-title">Пройденных глав</div>
+      <div style="font-size:28px; font-weight:800; color:var(--dino-green-900);">{{ completed|length }}</div>
+    </div>
+  </div>
+  <div style="margin:14px 0 8px;">
+    {% if can_download_certificate %}
+      <a class="btn" href="/certificate/">Скачать сертификат (PDF)</a>
+    {% else %}
+      <button class="btn secondary" disabled>Скачать сертификат (доступно после 100%)</button>
+    {% endif %}
+  </div>
+  <h3 style="margin-top:12px;">Пройденные главы</h3>
+  <ul class="card section-card" style="list-style:none; margin:0; padding:12px;">
+    {% for p in completed %}
+      <li style="padding:8px 2px; border-bottom:1px dashed var(--card-border);">
+        <strong>{{ p.lesson.order }}. {{ p.lesson.title }}</strong>
+        <span style="color:var(--muted);"> — {{ p.best_score }}
+          {% if p.best_score == 1 %}очко
+          {% elif p.best_score >= 2 and p.best_score <= 4 %}очка
+          {% else %}очков
+          {% endif %}
+        </span>
+      </li>
+    {% empty %}
+      <li>Пока нет завершённых глав.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

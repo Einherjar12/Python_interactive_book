@@ -1,0 +1,237 @@
+:root {
+  --dino-green-50: #f3fbf6;
+  --dino-green-100: #e6f7ec;
+  --dino-green-200: #c9ecd5;
+  --dino-green-300: #a7dfbb;
+  --dino-green-400: #7fcf9b;
+  --dino-green-500: #59bf7e;
+  --dino-green-600: #3aa865;
+  --dino-green-700: #2f8852;
+  --dino-green-800: #276e43;
+  --dino-green-900: #1f5837;
+  --paper-bg: #f7fbf8;
+  --ink: #233329;
+  --card-bg: #ffffff;
+  --card-border: #e6efe9;
+  --muted: #6b7f73;
+}
+
+body { background: var(--paper-bg); color: var(--ink); }
+header a, nav a { color: var(--dino-green-800); text-decoration: none; }
+
+.btn {
+  background: var(--dino-green-700);
+  color: #fff;
+  padding: 11px 18px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  transition: .22s transform, .22s box-shadow;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 12px 24px rgba(47, 136, 82, .25); }
+.btn.secondary { background: #8fa79a; }
+.btn.ghost { background: #fff; color: var(--dino-green-800); border: 1px solid var(--dino-green-200); }
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(31, 88, 55, .08);
+  padding: 16px;
+}
+
+.app-shell {
+  --mx: 50vw;
+  --my: 50vh;
+  background: radial-gradient(circle at var(--mx) var(--my), rgba(89,191,126,.10), transparent 240px),
+              linear-gradient(180deg, #f6fcf8 0%, #eef8f1 100%);
+  min-height: 100vh;
+}
+.app-header { position: sticky; top: 0; z-index: 20; }
+.app-header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,.78);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 10px 14px;
+  backdrop-filter: blur(8px);
+}
+.brand { font-weight: 800; letter-spacing: .3px; color: var(--dino-green-900); }
+.top-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.top-nav a { font-weight: 500; }
+.nav-user {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--dino-green-900);
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.top-nav-dot { color: var(--muted); user-select: none; }
+.app-footer { opacity: .7; padding-bottom: 24px; }
+
+.book-cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 1px solid var(--card-border);
+  background: linear-gradient(145deg, #f9fefb 0%, #eaf7ef 100%);
+  box-shadow: 0 25px 45px rgba(31,88,55,.16);
+}
+.book-cover::before {
+  content: "";
+  position: absolute;
+  left: 50%; top: 0; width: 2px; height: 100%;
+  background: linear-gradient(to bottom, rgba(47,136,82,.15), rgba(47,136,82,.4), rgba(47,136,82,.15));
+}
+.book-cover-page { padding: 36px; }
+.cover-pill {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--dino-green-800);
+  background: var(--dino-green-100);
+  border: 1px solid var(--dino-green-200);
+  border-radius: 999px;
+  padding: 6px 10px;
+}
+.feature-list { margin-top: 14px; color: var(--muted); }
+.feature-list li { margin: 6px 0; }
+
+.page-card {
+  border-radius: 22px;
+  background: linear-gradient(145deg, #ffffff 0%, #f3faf6 100%);
+  box-shadow: 0 28px 50px rgba(31,88,55,.14);
+  border: 1px solid #dcece2;
+}
+.section-card { border-radius: 16px; background: #ffffff; }
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin-bottom: 10px;
+}
+.task-box {
+  margin-bottom: 10px;
+  padding: 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  background: var(--dino-green-50);
+}
+.console-box {
+  margin-top: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  white-space: pre-wrap;
+  min-height: 150px;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+.progress-wrap {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: #d8e8dd;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--dino-green-500), var(--dino-green-700));
+  transition: width .4s ease;
+}
+.chapter-nav { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.chapter-nav a { text-decoration: none; }
+
+.page { transform-origin: left center; transition: transform 400ms ease, opacity 400ms ease; }
+.page.enter { transform: rotateY(-10deg); opacity: 0.0; }
+.page.enter-active { transform: rotateY(0deg); opacity: 1.0; }
+.page.leave { transform: rotateY(0deg); opacity: 1.0; }
+.page.leave-active { transform: rotateY(10deg); opacity: 0.0; }
+
+.lesson-grid { perspective: 1200px; }
+.lesson-grid > .section-card { transform-style: preserve-3d; animation: pageLift .45s ease both; }
+.lesson-grid > .section-card:nth-child(2) { animation-delay: .06s; }
+@keyframes pageLift {
+  from { transform: rotateY(-8deg) translateY(8px); opacity: 0; }
+  to { transform: rotateY(0) translateY(0); opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .book-cover-page { padding: 22px; }
+  .book-cover > div { grid-template-columns: 1fr !important; }
+  .chapter-nav { flex-direction: column; align-items: stretch; }
+  .lesson-grid { grid-template-columns: 1fr !important; }
+  .top-nav { font-size: 14px; }
+}
+
+/* Исправление для длинных строк кода и выравнивания колонок */
+.card.section-card {
+  overflow-x: auto;
+  word-wrap: break-word;
+  white-space: normal;
+}
+
+.task-box pre,
+.task-box code,
+.section-card pre,
+.section-card code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Для блоков с примерами кода в теории */
+.section-card div[style*="background: #1a2a22"] {
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Чтобы колонки были одинаковой высоты */
+.lesson-grid {
+  align-items: start;
+}
+
+/* Стили для поля пароля с иконкой глаза */
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper input {
+    width: 100%;
+    padding: 10px 40px 10px 12px !important;
+    box-sizing: border-box;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    margin: 0;
+    color: var(--muted);
+    transition: color 0.2s;
+    z-index: 1;
+}
+
+.password-toggle:hover {
+    color: var(--dino-green-700);
+}
+

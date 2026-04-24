@@ -1,0 +1,46 @@
+{% extends 'core/base.html' %}
+{% block title %}Регистрация — Dino Python Book{% endblock %}
+{% block content %}
+<div style="display:flex; justify-content:center; align-items:center; min-height:60vh;">
+  <div class="card" style="width:100%; max-width:480px;">
+    <h2 style="margin-top:0; color:var(--dino-green-900);">Регистрация</h2>
+    <p style="margin-top:0; color:var(--muted);">Создайте аккаунт, чтобы отслеживать прогресс и получать сертификат.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div style="margin-bottom:10px; color:#b91c1c;">{{ form.non_field_errors }}</div>
+      {% endif %}
+      <div style="margin-bottom:12px;">
+        <label for="{{ form.username.id_for_label }}" style="display:block; font-weight:600; margin-bottom:6px;">Логин</label>
+        <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" value="{{ form.username.value|default_if_none:'' }}" style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px;">
+        {% if form.username.errors %}
+          <div style="margin-top:6px; color:#b91c1c;">{{ form.username.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      <div style="margin-bottom:12px;">
+        <label for="{{ form.password1.id_for_label }}" style="display:block; font-weight:600; margin-bottom:6px;">Пароль</label>
+        <p style="margin:0 0 8px; font-size:13px; color:var(--muted);">Не менее 8 символов: латинские a–z и A–Z, цифра и спецсимвол.</p>
+        <div class="password-wrapper">
+          <input type="password" name="{{ form.password1.name }}" id="{{ form.password1.id_for_label }}" style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px;">
+          <button type="button" class="password-toggle" aria-label="Показать/скрыть пароль">👁️</button>
+        </div>
+        {% if form.password1.errors %}
+          <div style="margin-top:6px; color:#b91c1c;">{{ form.password1.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      <div style="margin-bottom:16px;">
+        <label for="{{ form.password2.id_for_label }}" style="display:block; font-weight:600; margin-bottom:6px;">Повторите пароль</label>
+        <div class="password-wrapper">
+          <input type="password" name="{{ form.password2.name }}" id="{{ form.password2.id_for_label }}" style="width:100%; padding:10px 12px; border:1px solid #ccc; border-radius:8px;">
+          <button type="button" class="password-toggle" aria-label="Показать/скрыть пароль">👁️</button>
+        </div>
+        {% if form.password2.errors %}
+          <div style="margin-top:6px; color:#b91c1c;">{{ form.password2.errors|striptags }}</div>
+        {% endif %}
+      </div>
+      <button class="btn" type="submit">Создать аккаунт</button>
+    </form>
+    <div style="margin-top:12px; color:var(--muted);">Уже с нами? <a href="/login/">Войти</a></div>
+  </div>
+</div>
+{% endblock %}
